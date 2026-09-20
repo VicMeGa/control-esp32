@@ -6,11 +6,11 @@ class CalibracionTab(ttk.Frame):
     def __init__(self, parent, puente):
         super().__init__(parent)
         self.puente = puente
-        # Mantenemos claves en mayúsculas para consistencia con perfiles.py
-        self.angulos = {"J1X": 90, "J1Y": 90, "J2X": 90, "J2Y": 90}
-        self.perfil_edicion = perfiles.obtener_perfil_activo()
+        self.master_app = parent.master
         
-        # Estado de la UI
+        self.angulos = {"J1X": 90, "J1Y": 90, "J2X": 90, "J2Y": 90}
+        self.perfil_edicion = self.master_app.perfil_activo
+        
         self.canvas_objects = {}
         self.labels = {}
         self._widgets_listos = False
@@ -19,7 +19,6 @@ class CalibracionTab(ttk.Frame):
         self._widgets_listos = True
 
     def _build_ui(self):
-        # 1. Selector de perfil
         top_frame = ttk.Frame(self)
         top_frame.pack(fill=tk.X, pady=5)
         
@@ -31,14 +30,12 @@ class CalibracionTab(ttk.Frame):
         
         ttk.Button(top_frame, text="Nuevo perfil", command=self._nuevo_perfil).pack(side=tk.LEFT, padx=5)
 
-        # 2. Canvas
         canvas_frame = ttk.Frame(self)
         canvas_frame.pack(pady=10)
         
         self._create_canvas(canvas_frame, "J1X", "J1Y", "Joystick 1")
         self._create_canvas(canvas_frame, "J2X", "J2Y", "Joystick 2")
 
-        # 3. Botones de guardar
         save_frame = ttk.Frame(self)
         save_frame.pack(fill=tk.X, pady=10)
         
@@ -58,11 +55,9 @@ class CalibracionTab(ttk.Frame):
         canvas = tk.Canvas(frame, width=200, height=200, bg="white", highlightbackground="gray")
         canvas.pack()
         
-        # Punto inicial en el centro
         cx, cy = 100, 100
         circle = canvas.create_oval(cx-5, cy-5, cx+5, cy+5, fill="red")
         
-        # Labels de ángulos
         lbl_x = ttk.Label(frame, text=f"{key_x}: {self.angulos[key_x]}°")
         lbl_x.pack()
         lbl_y = ttk.Label(frame, text=f"{key_y}: {self.angulos[key_y]}°")
@@ -92,7 +87,6 @@ class CalibracionTab(ttk.Frame):
         self._send_update()
 
     def _send_update(self):
-        # Convertimos explícitamente a las claves minúsculas que espera el puente
         if self.puente:
             self.puente.set_angulos(
                 j1x=self.angulos["J1X"],
@@ -100,6 +94,7 @@ class CalibracionTab(ttk.Frame):
                 j2x=self.angulos["J2X"],
                 j2y=self.angulos["J2Y"]
             )
+            self.master_app.sent_label.config(text=f"Enviado: J1X:{self.angulos['J1X']};J1Y:{self.angulos['J1Y']};J2X:{self.angulos['J2X']};J2Y:{self.angulos['J2Y']}")
 
     def _guardar_valor(self, eje, campo):
         if not self._widgets_listos: return
@@ -116,11 +111,10 @@ class CalibracionTab(ttk.Frame):
         if nombre:
             try:
                 perfiles.crear_perfil(nombre)
-                self.profile_combo["values"] = perfiles.listar_perfiles()
-                self.profile_combo.set(nombre)
-                self.perfil_edicion = nombre
+                self.master_app.notificar_cambio_perfil(nombre)
             except Exception as e:
                 messagebox.showerror("Error", str(e))
 
     def _on_profile_change(self, event):
-        self.perfil_edicion = self.profile_combo.get()
+        nuevo_perfil = self.profile_combo.get()
+        self.master_app.notificar_cambio_perfil(nuevo_perfil)

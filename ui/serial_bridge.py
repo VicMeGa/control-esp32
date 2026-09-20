@@ -15,6 +15,7 @@ class PuenteServos:
         self._pending_movement = None      # Último comando de movimiento (last-one-wins)
         self._lock = threading.Lock()
         
+        # Iniciar hilo de trabajo
         self.thread = threading.Thread(target=self._worker, daemon=True)
         self.thread.start()
 
@@ -27,6 +28,13 @@ class PuenteServos:
         self._command_queue.put("STATUS\n")
 
     def _worker(self):
+        # --- CORRECCIÓN: Tiempo de espera y limpieza del buffer en el hilo secundario ---
+        # Esto permite que el GUI no se congele durante el arranque del ESP32
+        time.sleep(2.0)
+        self.ser.reset_input_buffer()
+        # -------------------------------------------------------------------------------
+        
+        last_activity = time.time()
         while self._running.is_set():
             # 1. Enviar (Prioridad a _command_queue, luego _pending_movement)
             cmd_to_send = None
@@ -41,9 +49,14 @@ class PuenteServos:
                         cmd_to_send = self._pending_movement
                         self._pending_movement = None
             
+            # Heartbeat si no hubo actividad en 1 segundo
+            if not cmd_to_send and (time.time() - last_activity) > 1.0:
+                cmd_to_send = "STATUS\n"
+            
             if cmd_to_send:
                 try:
                     self.ser.write(cmd_to_send.encode())
+                    last_activity = time.time()
                 except (serial.SerialException, OSError):
                     self._notify_disconnection()
                     break
@@ -54,6 +67,7 @@ class PuenteServos:
                     line = self.ser.readline().decode().strip()
                     if line:
                         self.recv_queue.put(line)
+                        last_activity = time.time()
             except (serial.SerialException, OSError):
                 self._notify_disconnection()
                 break

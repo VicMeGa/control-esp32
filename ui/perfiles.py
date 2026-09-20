@@ -59,6 +59,14 @@ def actualizar_valor(nombre_perfil, eje, campo, valor):
     datos["perfiles"][nombre_perfil][eje][campo] = valor
     guardar(datos)
 
+# Nueva función para guardar un perfil completo
+def guardar_perfil_datos(nombre_perfil, nuevos_datos):
+    datos = cargar()
+    if nombre_perfil not in datos["perfiles"]:
+        raise ValueError(f"El perfil '{nombre_perfil}' no existe.")
+    datos["perfiles"][nombre_perfil] = nuevos_datos
+    guardar(datos)
+
 def obtener_perfil_activo():
     return cargar()["perfil_activo"]
 
