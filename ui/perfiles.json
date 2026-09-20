@@ -1,0 +1,49 @@
+{
+  "perfil_activo": "default",
+  "perfiles": {
+    "default": {
+      "J1X": {
+        "min": 9,
+        "centro": 90,
+        "max": 165
+      },
+      "J1Y": {
+        "min": 159,
+        "centro": 90,
+        "max": 18
+      },
+      "J2X": {
+        "min": 12,
+        "centro": 90,
+        "max": 164
+      },
+      "J2Y": {
+        "min": 159,
+        "centro": 90,
+        "max": 25
+      }
+    },
+    "p": {
+      "J1X": {
+        "min": 90,
+        "centro": 90,
+        "max": 180
+      },
+      "J1Y": {
+        "min": 0,
+        "centro": 90,
+        "max": 180
+      },
+      "J2X": {
+        "min": 0,
+        "centro": 90,
+        "max": 180
+      },
+      "J2Y": {
+        "min": 0,
+        "centro": 90,
+        "max": 180
+      }
+    }
+  }
+}
