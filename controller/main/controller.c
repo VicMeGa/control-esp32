@@ -56,7 +56,7 @@
 // ---------- Configuracion I2C ----------
 #define I2C_MASTER_NUM      I2C_NUM_0
 #define I2C_MASTER_SDA_IO   21
-#define I2C_MASTER_SCL_IO   22++++++++
+#define I2C_MASTER_SCL_IO   22
 #define I2C_MASTER_FREQ_HZ  400000
 #define PCA9685_ADDR        0x40   // direccion default del PCA9685
 
@@ -72,9 +72,10 @@
 
 // ---------- Canales de servo ----------
 #define CH_J1X 0
-#define CH_J2X 2
-#define CH_J1Y 1
-#define CH_J2Y 3
+#define CH_J1Y 4
+
+#define CH_J2X 8
+#define CH_J2Y 12
 
 #define SERVO_FREQ_HZ   50.0f
 #define PULSE_MIN_US    500

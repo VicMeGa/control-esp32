@@ -6,5 +6,3 @@ pkgs.mkShell {
     pyserial
   ];
 }
-
-0
