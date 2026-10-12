@@ -10,7 +10,7 @@ class ControlTab(ttk.Frame):
         
         self.perfil_actual = self.master_app.perfil_activo
         self.limites = perfiles.obtener_perfil(self.perfil_actual)
-        self.angulos_actuales = {eje: self.limites[eje]["centro"] for eje in self.limites}
+        self.angulos_actuales = self.master_app.angulos_globales
         
         self.canvas_size = 200
         self.canvas_objects = {}
@@ -118,14 +118,12 @@ class ControlTab(ttk.Frame):
         obj["lbl"].config(text=f"{obj['key_x']}: {self.angulos_actuales[obj['key_x']]}° | {obj['key_y']}: {self.angulos_actuales[obj['key_y']]}°")
 
     def _send_update(self):
-        if self.puente:
-            self.puente.set_angulos(
-                j1x=self.angulos_actuales["J1X"],
-                j1y=self.angulos_actuales["J1Y"],
-                j2x=self.angulos_actuales["J2X"],
-                j2y=self.angulos_actuales["J2Y"]
-            )
-            self.master_app.sent_label.config(text=f"Enviado: J1X:{self.angulos_actuales['J1X']};J1Y:{self.angulos_actuales['J1Y']};J2X:{self.angulos_actuales['J2X']};J2Y:{self.angulos_actuales['J2Y']}")
+        self.master_app.actualizar_angulos(
+            J1X=self.angulos_actuales["J1X"],
+            J1Y=self.angulos_actuales["J1Y"],
+            J2X=self.angulos_actuales["J2X"],
+            J2Y=self.angulos_actuales["J2Y"]
+        )
 
     def _on_profile_change(self, event):
         nuevo_perfil = self.profile_combo.get()

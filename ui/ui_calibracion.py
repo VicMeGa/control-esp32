@@ -8,7 +8,7 @@ class CalibracionTab(ttk.Frame):
         self.puente = puente
         self.master_app = parent.master
         
-        self.angulos = {"J1X": 90, "J1Y": 90, "J2X": 90, "J2Y": 90}
+        self.angulos = self.master_app.angulos_globales
         self.perfil_edicion = self.master_app.perfil_activo
         
         self.canvas_objects = {}
@@ -87,14 +87,12 @@ class CalibracionTab(ttk.Frame):
         self._send_update()
 
     def _send_update(self):
-        if self.puente:
-            self.puente.set_angulos(
-                j1x=self.angulos["J1X"],
-                j1y=self.angulos["J1Y"],
-                j2x=self.angulos["J2X"],
-                j2y=self.angulos["J2Y"]
-            )
-            self.master_app.sent_label.config(text=f"Enviado: J1X:{self.angulos['J1X']};J1Y:{self.angulos['J1Y']};J2X:{self.angulos['J2X']};J2Y:{self.angulos['J2Y']}")
+        self.master_app.actualizar_angulos(
+            J1X=self.angulos["J1X"],
+            J1Y=self.angulos["J1Y"],
+            J2X=self.angulos["J2X"],
+            J2Y=self.angulos["J2Y"]
+        )
 
     def _guardar_valor(self, eje, campo):
         if not self._widgets_listos: return

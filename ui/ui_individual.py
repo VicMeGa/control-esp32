@@ -5,7 +5,8 @@ class IndividualTab(ttk.Frame):
     def __init__(self, parent, puente):
         super().__init__(parent)
         self.puente = puente
-        self.angulos = {"j1x": 90, "j1y": 90, "j2x": 90, "j2y": 90}
+        self.master_app = parent.master
+        self.angulos = self.master_app.angulos_globales
         self.sliders = {}
         self.labels = {}
         self._widgets_listos = False
@@ -16,11 +17,12 @@ class IndividualTab(ttk.Frame):
 
     def _build_ui(self):
         # Crear filas para cada servo
-        for key, val in self.angulos.items():
+        for key in ["J1X", "J1Y", "J2X", "J2Y"]:
+            val = self.angulos[key]
             row = ttk.Frame(self)
             row.pack(fill=tk.X, pady=5)
             
-            ttk.Label(row, text=key.upper()+":", width=6).pack(side=tk.LEFT)
+            ttk.Label(row, text=key+":", width=6).pack(side=tk.LEFT)
             
             # 1. Crear Label PRIMERO
             lbl = ttk.Label(row, text=f"{int(val)}°", width=5)
@@ -29,7 +31,7 @@ class IndividualTab(ttk.Frame):
             
             # 2. Crear Slider DESPUÉS
             slider = ttk.Scale(row, from_=0, to=180, orient=tk.HORIZONTAL,
-                              command=lambda val, k=key: self._on_slider_change(k, val))
+                               command=lambda val, k=key: self._on_slider_change(k, val))
             slider.set(val)
             slider.pack(side=tk.LEFT, expand=True, fill=tk.X, padx=10)
             self.sliders[key] = slider
@@ -49,10 +51,9 @@ class IndividualTab(ttk.Frame):
             return
             
         val = int(float(val))
-        self.angulos[key] = val
+        self.master_app.actualizar_angulos(**{key: val})
         if key in self.labels:
             self.labels[key].config(text=f"{val}°")
-        self._send_update()
 
     def _center_servo(self, key):
         if key in self.sliders:
@@ -64,7 +65,3 @@ class IndividualTab(ttk.Frame):
             if key in self.sliders:
                 self.sliders[key].set(90)
         # _on_slider_change es llamado automáticamente para cada uno
-
-    def _send_update(self):
-        if self.puente:
-            self.puente.set_angulos(**self.angulos)

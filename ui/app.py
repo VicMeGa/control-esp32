@@ -18,6 +18,12 @@ class App(tk.Tk):
         self.puente = None
         self.perfil_activo = perfiles.obtener_perfil_activo()
         
+        # Estado global de ángulos para todos los servos (evita cruces y saltos entre pestañas)
+        perfil_data = perfiles.obtener_perfil(self.perfil_activo)
+        self.angulos_globales = {
+            eje: perfil_data[eje]["centro"] for eje in ["J1X", "J1Y", "J2X", "J2Y"]
+        }
+        
         self._setup_top_bar()
         self._setup_notebook()
         self._setup_bottom_bar()
@@ -77,9 +83,30 @@ class App(tk.Tk):
         if puente_actual:
             puente_actual.ser.write(b"BASURA_TEST\n")
 
+    def actualizar_angulos(self, **kwargs):
+        """Actualiza los ángulos globales y envía el comando completo con los últimos valores conocidos."""
+        for k, v in kwargs.items():
+            k_upper = k.upper()
+            if k_upper in self.angulos_globales:
+                self.angulos_globales[k_upper] = int(v)
+        
+        if self.puente:
+            self.puente.set_angulos(
+                j1x=self.angulos_globales["J1X"],
+                j1y=self.angulos_globales["J1Y"],
+                j2x=self.angulos_globales["J2X"],
+                j2y=self.angulos_globales["J2Y"]
+            )
+            self.sent_label.config(
+                text=f"Enviado: J1X:{self.angulos_globales['J1X']};J1Y:{self.angulos_globales['J1Y']};J2X:{self.angulos_globales['J2X']};J2Y:{self.angulos_globales['J2Y']}"
+            )
+
     def notificar_cambio_perfil(self, nuevo_nombre):
         self.perfil_activo = nuevo_nombre
         perfiles.establecer_perfil_activo(nuevo_nombre)
+        perfil_data = perfiles.obtener_perfil(nuevo_nombre)
+        for eje in ["J1X", "J1Y", "J2X", "J2Y"]:
+            self.angulos_globales[eje] = perfil_data[eje]["centro"]
         self._reinit_tabs()
 
     def toggle_connection(self):
